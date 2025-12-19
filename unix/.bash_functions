@@ -299,7 +299,6 @@ function git-commit-hours() {
   local date_format="%Y-%m-%d %H:%M:%S"
 
   local target_date
-
   target_date="$(date --date="${hours} hours" +"${date_format}")"
 
   GIT_AUTHOR_DATE="${target_date}" \
@@ -823,7 +822,7 @@ function adb-sensor-ls() {
   | sort --uniq
 }
 
-function adb-colorize() {
+function adb-logcat-colorize() {
   local app="$1"
 
   while read -r line; do

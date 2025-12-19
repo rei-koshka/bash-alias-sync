@@ -78,7 +78,7 @@ git config --global alias.branch-set-upstream '!set_upstream() { \
   git branch --set-upstream-to "origin/$(git branch --show-current)"; \
 }; set_upstream'
 
-git config --global alias.clear '!reset() { \
+git config --global alias.reset-hard '!reset() { \
   rm -f ".git/index.lock" && \
   git reset --hard && \
   git clean -fd && \
