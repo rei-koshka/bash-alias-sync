@@ -423,6 +423,19 @@ function git-branch-rm-fzf() {
     done
 }
 
+function git-tag-rm-remote-fzf() {
+  local tags
+
+  tags="$(git tag --list)"
+
+  echo "${tags}" \
+  | fzf --multi \
+  | while read -r tag; do
+      git tag -d "${tag}"
+      git push origin ":refs/tags/${tag}"
+    done
+}
+
 function git-ssh-command-fzf() {
   local key_private_path
 
@@ -1942,4 +1955,74 @@ function ssh-id-fzf() {
 function ps-port() {
   local port="$1"
   sudo lsof -i :$port
+}
+
+function gradle-dl() {
+  local version="$1"
+
+  if [[ -z "$version" ]]; then
+    echo "Usage: gradle-dl <version>"
+    return 1
+  fi
+
+  local dist_url="https://services.gradle.org/distributions/gradle-${version}-all.zip"
+
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+
+  local zip_file_path="${tmp_dir}/gradle-${version}.zip"
+
+  echo "Downloading Gradle ${version}..."
+  # -L follows redirects, -o specifies output file
+  if curl -L "${dist_url}" -o "${zip_file_path}"; then
+    echo "Unzipping..."
+    # -q for quiet mode, -d to specify destination
+    unzip -q "${zip_file_path}" -d "${tmp_dir}"
+
+    local gradle_home="${tmp_dir}/gradle-${version}"
+    local gradle_bin="${gradle_home}/bin"
+
+    if [[ -d "${gradle_bin}" ]]; then
+      export PATH="${gradle_bin}:${PATH}"
+
+      echo "Success! Gradle ${version} is now available in this session."
+      echo "Location: ${gradle_home}"
+
+      gradle -v
+    else
+      echo "Error: \`bin\` directory not found at: ${gradle_bin}"
+      return 1
+    fi
+  else
+    echo "Error downloading Gradle from: ${dist_url}"
+    return 1
+  fi
+}
+
+function avd-fzf() {
+  if [ -z "${ANDROID_SDK}" ]; then
+    echo "Environment variable \`ANDROID_SDK\` is not set"
+    return 1
+  fi
+
+  local emulator
+  emulator="${ANDROID_SDK}/emulator/emulator"
+
+  local avd
+
+  avd="$( \
+    $emulator -list-avds \
+    | fzf \
+      --tac \
+      --header="Pick emulator to start:" \
+      --layout="reverse" \
+      --no-sort \
+      --height="33%" \
+  )"
+
+  if [ -z "${avd}" ]; then
+    return 0
+  fi
+
+  $emulator -avd "${avd}"
 }
