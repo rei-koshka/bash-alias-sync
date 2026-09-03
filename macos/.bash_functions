@@ -12,3 +12,15 @@ function git-commit-hours() {
   GIT_COMMITTER_DATE="${target_date}" \
   git commit "$@"
 }
+
+function nosleep() {
+  sudo pmset -a disablesleep 1 || return 1
+
+  trap 'sudo pmset -a disablesleep 0; trap - EXIT INT TERM' EXIT INT TERM
+
+  echo
+  echo "No sleep until interrupt"
+  echo
+
+  caffeinate -dsu
+}
