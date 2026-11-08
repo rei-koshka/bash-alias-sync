@@ -362,3 +362,7 @@ function mkdir-cd() {
   mkdir -p "${dir}"
   cd "${dir}"
 }
+
+function gen-token() {
+  python3 -c 'import secrets; print(secrets.token_urlsafe(32))'
+}
